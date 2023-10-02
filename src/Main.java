@@ -1,16 +1,34 @@
 import classes.*;
+import classes.some_cool_media_library.ThirdPartyYouTubeClass;
+import classes.YouTubeDownloader;
+import classes.YouTubeCacheProxy;
 
-// A aplicação pode configurar proxies de forma fácil e rápida.
-class Main {
-    public void init() {
-        ThirdPartyYouTubeLib aYouTubeService = new ThirdPartyYouTubeClass();
-        ThirdPartyYouTubeLib aYouTubeProxy = new CachedYouTubeClass(aYouTubeService);
-        YouTubeManager manager = new YouTubeManager(aYouTubeProxy);
-        manager.reactOnUserInput();
-    }
+public class Main {
 
     public static void main(String[] args) {
-        Main app = new Main();
-        app.init();
+        YouTubeDownloader naiveDownloader = new YouTubeDownloader(new ThirdPartyYouTubeClass());
+        YouTubeDownloader smartDownloader = new YouTubeDownloader(new YouTubeCacheProxy());
+
+        long naive = test(naiveDownloader);
+        long smart = test(smartDownloader);
+        System.out.print("Time saved by caching proxy: " + (naive - smart) + "ms");
+
+    }
+
+    private static long test(YouTubeDownloader downloader) {
+        long startTime = System.currentTimeMillis();
+
+        // User behavior in our app:
+        downloader.renderPopularVideos();
+        downloader.renderVideoPage("catzzzzzzzzz");
+        downloader.renderPopularVideos();
+        downloader.renderVideoPage("dancesvideoo");
+        // Users might visit the same page quite often.
+        downloader.renderVideoPage("catzzzzzzzzz");
+        downloader.renderVideoPage("someothervid");
+
+        long estimatedTime = System.currentTimeMillis() - startTime;
+        System.out.print("Time elapsed: " + estimatedTime + "ms\n");
+        return estimatedTime;
     }
 }
